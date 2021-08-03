@@ -70,13 +70,15 @@ for it in range(epohs):
         bot_metka = popul_metka[i]
         # высчитываем DOP для каждого бота
         DOP, points_true = create_dop_factor(bot_metka, pointsOut, bot, ncorner, factor=40)
+        print('DOP ', DOP)
+        plot_dop_factor(rooms, bot, DOP, bot_metka)
         # добавляем среднее значение в список
         val.append(sum(DOP) / len(DOP))
 
     # получаем новую популяцию
     newpopul, newpopul_metka, sval = getSurvPopul(popul, popul_metka, val, nsurv, 0)
-    # выводим 3 лучших бота
-    print(it, " ", [round(s, 8) for s in sval[0:3]])
+    # выводим 5 лучших ботов
+    print(it, " ", [round(s, 8) for s in sval[0:5]])
 
     # добавляем среднее значение в список
     plotmeanval.append(val)
@@ -135,6 +137,7 @@ for it in range(epohs):
             iy = index_y[random.randint(0, len(index_y))]
             x[1] = y[iy][1]
 
+            # тут могут улетать точки за пределы ибо это надо одновременно значит можно менять что-то одно таща за собой вторую координату
             newbot.append(list(x))
 
         newpopul_metka.append(create_points_indoors(newbot, pointsIn, ncorner))
