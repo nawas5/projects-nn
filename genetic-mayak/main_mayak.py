@@ -123,20 +123,23 @@ for it in range(epohs):
             ymin = min(points_area_y)
             ymax = max(points_area_y)
 
-            index_x = []
-            for i in range(len(y)):
-                if y[i, 0] >= xmin and y[i, 0] <= xmax:
-                    index_x.append(i)
-            ix = index_x[random.randint(0, len(index_x))]
-            x[0] = y[ix][0]
-
-            index_y = []
-            for i in range(len(y)):
-                if y[i, 1] >= ymin and y[i, 1] <= ymax:
-                    index_y.append(i)
-            iy = index_y[random.randint(0, len(index_y))]
-            x[1] = y[iy][1]
-
+            # формируем какое-то число от 0 до 1
+            pindex = random.random()
+            # eсли pindex меньше 0.5, то берем значения от первого бота, иначе от второго
+            if pindex < 0.5:
+                index_x = []
+                for i in range(len(y)):
+                    if y[i, 0] >= xmin and y[i, 0] <= xmax:
+                        index_x.append(i)
+                ix = index_x[random.randint(0, len(index_x))]
+                x = y[ix]
+            else:
+                index_y = []
+                for i in range(len(y)):
+                    if y[i, 1] >= ymin and y[i, 1] <= ymax:
+                        index_y.append(i)
+                iy = index_y[random.randint(0, len(index_y))]
+                x = y[iy]
             # тут могут улетать точки за пределы ибо это надо одновременно значит можно менять что-то одно таща за собой вторую координату
             newbot.append(list(x))
 
