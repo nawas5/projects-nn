@@ -5,18 +5,18 @@ import numpy as np
     Функция получения выжившей популяции
         Входные параметры:
         - popul - наша популяция
-        - popul_points - наша популяция - внутренние точки (оставшиеся внутренние точки)
+        - popul_metka - наша популяция - внутренние точки (оставшиеся внутренние точки)
         - val - текущие значения
         - nsurv - количество выживших
         - reverse - указываем требуемую операцию поиска результата: максимизация или минимизация
 '''
 
 
-def getSurvPopul(popul, popul_indoor, val, nsurv, reverse):
+def getSurvPopul(popul, popul_metka, val, nsurv, reverse):
     # массив для новой популяции - координаты маяков
     newpopul = []
     # массив для новой популяции - оставшиеся внутренние точки (вычет координат маяков)
-    newpopul_indoor = []
+    newpopul_metka = []
     # сортируем значения в val в зависимости от параметра reverse - максимизация или минимизация
     sval = sorted(val, reverse=reverse)
     # проходимся по циклу nsurv-раз (в итоге в newpopul запишется nsurv-лучших показателей)
@@ -26,21 +26,20 @@ def getSurvPopul(popul, popul_indoor, val, nsurv, reverse):
         # в новую папуляцию добавляем элемент из текущей популяции с найденным индексом
         newpopul.append(popul[index])
         # в новую популяцию так же добавляем значения оставшихся точек
-        newpopul_indoor.append(popul_indoor[index])
+        newpopul_metka.append(popul_metka[index])
     # возвращаем новую популяцию (из nsurv элементов) и сортированный список val
-    return newpopul, newpopul_indoor, sval
+    return newpopul, newpopul_metka, sval
 
 
 '''
     Функция получения родителей
         Входные параметры:
         - curr_popul - текущая популяция
-        - curr_popul_indoor - текущая популяция оставшихся точек
+        - curr_popul_metka - текущая популяция оставшихся точек
         - nsurv - количество выживших
 '''
 
-
-def getParents(curr_popul, curr_popul_indoor, nsurv):
+def getParents(curr_popul, curr_popul_metka, nsurv):
     # случайный индекс первого родителя в диапазоне от 0 до nsurv - 1
     indexp1 = random.randint(0, nsurv - 1)
     # случайный индекс второго родителя в диапазоне от 0 до nsurv - 1
@@ -50,9 +49,9 @@ def getParents(curr_popul, curr_popul_indoor, nsurv):
     # получаем второго бота-родителя по indexp2
     botp2 = curr_popul[indexp2]
     # здесь берется бот текущей популяции - координаты четырех маяков - и выбираются остаточные точки
-    botp1_indoor = curr_popul_indoor[indexp1]
-    botp2_indoor = curr_popul_indoor[indexp2]
-    return botp1, botp1_indoor, botp2, botp2_indoor  # Возвращаем обоих полученных ботов
+    botp1_metka = curr_popul_metka[indexp1]
+    botp2_metka = curr_popul_metka[indexp2]
+    return botp1, botp1_metka, botp2, botp2_metka  # Возвращаем обоих полученных ботов
 
 
 '''
@@ -63,7 +62,6 @@ def getParents(curr_popul, curr_popul_indoor, nsurv):
         - pointsIn - все внутренние точки
         - j - номер компонента бота - координаты одного маяка
 '''
-
 
 def crossPointFrom2Parents(botp1, botp2, pointsIn, j):
     pindex = random.random()  # Получаем случайное число в диапазоне от 0 до 1

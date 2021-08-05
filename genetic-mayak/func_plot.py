@@ -45,10 +45,9 @@ def plot_dop_factor(rooms, coord_mayak, DOP, pointsInMetka):
     xr, yr = zip(*rooms_plot)
 
     fig = go.Figure()
-    # fig.add_trace(go.Scatter3d(x=xr, y=yr, z=np.zeros(len(xr)),
-    #                            mode='markers',
-    #                            opacity=0.2,
-    #                            name="rooms"))
+    fig.add_trace(go.Scatter3d(x=xr, y=yr, z=np.zeros(len(xr)),
+                               mode='lines',
+                               name="rooms"))
 
     fig.add_trace(go.Mesh3d(x=(pointsInMetka[:, 0]),
                             y=(pointsInMetka[:, 1]),
@@ -60,15 +59,9 @@ def plot_dop_factor(rooms, coord_mayak, DOP, pointsInMetka):
 
     fig.add_trace(go.Scatter3d(x=coord_mayak[:, 0],
                                y=coord_mayak[:, 1],
-                               z=np.zeros(len(coord_mayak))+0.5,
+                               z=np.zeros(len(coord_mayak)),
                                mode='markers',
-                               name='coord mayak'))
+                               name='coord mayak'
+                              ))
 
-    fig.add_trace(go.Scatter3d(x=(pointsInMetka[:, 0]),
-                               y=(pointsInMetka[:, 1]),
-                               z=np.zeros(len(pointsInMetka)),
-                               mode="markers",
-                               name="points metka"
-                               ))
-    #fig.show()
-    fig.show(renderer="browser")
+    fig.show()
