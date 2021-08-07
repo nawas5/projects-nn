@@ -25,9 +25,9 @@ ncorner = len(rooms)
 kstepx, kstepy = 100, 50
 
 # размер популяции
-npopul = 15
+npopul = 20
 # количество выживших особей (столько лучших ботов перейдет в новую популяцию)
-nsurv = 5
+nsurv = 10
 # количество новых ботов (столько новых ботов будет создано)
 nnew = npopul - nsurv
 # размер бота (nmayak, 2) - число маяков на их координаты
@@ -69,7 +69,7 @@ for it in range(epohs):
         bot = popul[i]
         bot_metka = popul_metka[i]
         # высчитываем DOP для каждого бота
-        DOP, points_true = create_dop_factor(bot_metka, pointsOut, bot, ncorner, factor=50)
+        DOP, points_true = create_dop_factor(rooms, bot_metka, bot, ncorner, factor)
         # plot_dop_factor(rooms, bot, DOP, bot_metka)
         # добавляем среднее значение в список
         val.append(sum(DOP) / len(DOP))

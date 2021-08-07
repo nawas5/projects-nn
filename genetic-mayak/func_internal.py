@@ -106,30 +106,30 @@ def create_points_indoors(coord_mayak, pointsIn, nmayak):
         - rooms - размеры комнаты
         - mayak - координаты маяка
         - metka - координаты метки
+        - ncorner - число углов комнаты
         Выходные параметры:
         - flag - 0 (отрезки не пересекаются); 1 (отрезки пересекаются)
 '''
 
-def intersection_segments(rooms, mayak, metka):
+def intersection_segments(rooms, mayak, metka, ncorner):
 
   # объявляем переменную flag
   # flag = 0 - метка и маяк в прямой видимости
   # flag = 1 - метка и маяк не в прямой видимости
   # (есть пересечение стены и прямой метка-маяк)
 
-  flag = 0
+  flag_metka = []
 
-  xm1 = mayak[0]
-  ym1 = mayak[0]
-  xm2 = metka[0]
-  ym2 = metka[0]
+  xm1, ym1 = mayak
+  xm2, ym2 = metka
 
   A1 = ym1 - ym2
   B1 = xm2 - xm1
   C1 = xm1 * ym2 - xm2 * ym1
 
   def intersection_point(x, y):
-    if min(xm1, xm2) <= x <= max(xm1, xm2):
+    if min(xm1, xm2) <= x <= max(xm1, xm2) and min(xc1, xc2) <= x <= max(xc1, xc2) and \
+        min(ym1, ym2) <= y <= max(ym1, ym2) and min(yc1, yc2) <= y <= max(yc1, yc2):
       # есть пересечение отрезков
       flag = 1
     else:
@@ -138,6 +138,9 @@ def intersection_segments(rooms, mayak, metka):
     return flag
 
   for i in range(ncorner):
+
+    flag = 0
+
     xc1, yc1 = rooms[i]
     if i != (ncorner - 1):
       xc2, yc2 = rooms[i+1]
@@ -148,11 +151,14 @@ def intersection_segments(rooms, mayak, metka):
     B2 = xc2 - xc1
     C2 = xc1 * yc2 - xc2 * yc1
 
-    if B1*A2 - B2*A1 and A1:
+    if (B1*A2 - B2*A1) != 0 and A1 != 0:
       y = (C2*A1 - C1*A2) / (B1*A2 - B2*A1)
       x = (-C1 - B1*y) / A1
       flag = intersection_point(x, y)
-    elif B1*A2 - B2*A1 and A2:
+    else:
+      flag = 0
+
+    if (B1*A2 - B2*A1) != 0 and A2 != 0:
       y = (C2*A1 - C1*A2) / (B1*A2 - B2*A1)
       x = (-C2 - B2*y) / A2
       flag = intersection_point(x, y)
@@ -160,19 +166,21 @@ def intersection_segments(rooms, mayak, metka):
       # пересечения отрезков нет, отрезки параллельны
       flag = 0
 
-    return flag
+    flag_metka.append(flag)
+
+  return max(flag_metka)
 
 '''
     Функция расчета геометрического фактора для всех точек внутри помещения
         Входные параметры:
+        - rooms - параметры комнатв
         - pointsInMetka - координаты оставшихся внутренних точек
-        - pointsOut - координаты внешних точек
         - coord_mayak - координаты маяков
         - nmayak - число маяков 
         - factor - значение DOP для точек, для которых невозможно вычислить DOP
 '''
 
-def create_dop_factor(pointsInMetka, pointsOut, coord_mayak, nmayak, factor):
+def create_dop_factor(rooms, pointsInMetka, coord_mayak, nmayak, factor):
     # создаем пустую матрицу DOP
     DOP = np.zeros(len(pointsInMetka))
     # заполняем DOP значением, где невозможно произвести расчет DOP
@@ -180,6 +188,7 @@ def create_dop_factor(pointsInMetka, pointsOut, coord_mayak, nmayak, factor):
     # объявляем переменную - для скольких точек можно вычислить DOP
     # когда метку видят минимум 3 маяка
     points_true = 0
+
 
     # делаем цикл по всем точкам внутри помещения (кроме координат маяков)
     for i in range(len(pointsInMetka)):
@@ -208,6 +217,7 @@ def create_dop_factor(pointsInMetka, pointsOut, coord_mayak, nmayak, factor):
                 rast_matrix[j] = np.sqrt((pointsInMetka[i][1] - coord_mayak[j][1]) ** 2)
                 grad_matrix[j] = (pointsInMetka[i] - coord_mayak[j]) / rast_matrix[j]
 
+
             # если координата по y метки равна координате по y маяка
             # получаем, что метка и маяк образую собой горизонтальную прямую - меняется только значение x
 
@@ -218,15 +228,20 @@ def create_dop_factor(pointsInMetka, pointsOut, coord_mayak, nmayak, factor):
             # если точка и маяк лежат на кривой с наклоном
             # здесь также можно рассмотреть следующий цикл - будет строиться прямая и сравнение с каждой прямой,
             # которая образует стенку комнаты
-            elif (pointsInMetka[i][1] - coord_mayak[j][1]) and (pointsInMetka[i][0] - coord_mayak[j][0]) != 0:
+            elif (pointsInMetka[i][1] - coord_mayak[j][1]) != 0 and (pointsInMetka[i][0] - coord_mayak[j][0]) != 0:
                 rast_matrix[j] = (np.sqrt((pointsInMetka[i][0] - coord_mayak[j][0]) ** 2 +
                                           (pointsInMetka[i][1] - coord_mayak[j][1]) ** 2))
-                grad_matrix[j] = (pointsInMetka[i] - coord_mayak[j]) / (rast_matrix[j])
+                grad_matrix[j] = (pointsInMetka[i] - coord_mayak[j]) / rast_matrix[j]
 
         # если для одной метки насчитали 3 и более маяка в зоне видимости, то можно рассчитать DOP
         if flag_mayak >= 3:
             # увеличиваем число переменной для которой можно высчитать DOP
             points_true += 1
-            DOP[i] = np.sqrt(np.trace(np.linalg.inv((grad_matrix.T).dot(grad_matrix))))
+
+            if np.isfinite(np.linalg.cond(grad_matrix.T)):
+                DOP[i] = np.sqrt(np.trace(np.linalg.inv((grad_matrix.T).dot(grad_matrix))))
+            else:
+                print('singular matrix')
+            # DOP[i] = np.sqrt(np.trace(np.linalg.inv((grad_matrix.T).dot(grad_matrix))))
 
     return DOP, points_true
